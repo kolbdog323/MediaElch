@@ -17,6 +17,10 @@ struct Actor
     QString id;
     int order{0}; // used by Kodi NFO
     bool imageHasChanged{false};
+
+    // If true, merge/update operations and clearImages() should NOT overwrite
+    // this actor's image when applying updates from other sources. Default false.
+    bool preserveImage{false};
 };
 
 
