@@ -1,82 +1,69 @@
-#include "data/Actor.h"
+#pragma once
 
+#include "utils/Meta.h"
 
-QDebug operator<<(QDebug dbg, const Actor& actor)
+#include <QDebug>
+#include <QMetaType>
+#include <QObject>
+#include <QString>
+#include <QVector>
+
+struct Actor
 {
-    QString nl = "\n";
-    QString out;
-    out.append("Actor").append(nl);
-    out.append(QStringLiteral("  Name:  ").append(actor.name).append(nl));
-    out.append(QStringLiteral("  Role:  ").append(actor.role).append(nl));
-    out.append(QStringLiteral("  Thumb: ").append(actor.thumb).append(nl));
-    out.append(QStringLiteral("  ID:    ").append(actor.id).append(nl));
-    out.append(QStringLiteral("  Order: ").append(QString::number(actor.order)).append(nl));
-    dbg.nospace() << out;
-    return dbg.maybeSpace();
-}
+    QString name;
+    QString role;
+    QString thumb;
+    QByteArray image;
+    QString id;
+    int order{0}; // used by Kodi NFO
+    bool imageHasChanged{false};
 
-void Actors::addActor(Actor actor)
-{
-    if (actor.order == 0 && !m_actors.empty()) {
-        actor.order = m_actors.back()->order + 1;
-    }
-    auto* a = new Actor(actor);
-    m_actors.push_back(a);
-}
+    // If true, merge/update operations and clearImages() should NOT overwrite
+    // this actor's image when applying updates from other sources. Default false.
+    bool preserveImage{false};
+};
 
-void Actors::removeActor(Actor* actor)
-{
-    // Note on clang-tidy: We can't use `auto*` for Qt6
-    auto i = std::find(m_actors.begin(), m_actors.end(), actor);
-    if (i != m_actors.end()) {
-        m_actors.erase(i);
-        delete actor;
-    }
-}
 
-bool Actors::hasActors() const
+class Actors : public QObject
 {
-    return !m_actors.isEmpty();
-}
+    Q_OBJECT
+public:
+    Actors(QObject* parent = nullptr) : QObject(parent) {}
+    ~Actors() override;
 
-void Actors::clearImages()
-{
-    for (auto& actor : m_actors) {
-        actor->image = QByteArray();
-    }
-}
+    void setActors(QVector<Actor> actors);
+    void addActor(Actor actor);
+    /// \brief Removes the given actor. Actors are compared by pointer and not by value.
+    void removeActor(Actor* actor);
 
-Actors::~Actors()
-{
-    qDeleteAll(m_actors);
-    m_actors.clear();
-}
+    elch_ssize_t size() const { return m_actors.size(); }
+    bool hasActors() const;
 
-void Actors::setActors(QVector<Actor> actors)
-{
-    removeAll();
-    for (const Actor& a : actors) {
-        auto* actor = new Actor(a);
-        m_actors.push_back(actor);
-    }
-}
+    /// \brief Clears all images from all actors.
+    void clearImages();
+    /// \brief Deletes all actors. All actor pointers are invalidated.
+    void removeAll();
 
-void Actors::removeAll()
-{
-    qDeleteAll(m_actors);
-    m_actors.clear();
-}
+    const QVector<Actor*>& actors();
+    QVector<const Actor*> actors() const;
 
-const QVector<Actor*>& Actors::actors()
-{
-    return m_actors;
-}
+public:
+    auto begin() { return m_actors.begin(); }
+    auto end() { return m_actors.end(); }
+    auto begin() const { return m_actors.begin(); }
+    auto end() const { return m_actors.end(); }
+    auto cbegin() const { return m_actors.cbegin(); }
+    auto cend() const { return m_actors.cend(); }
 
-QVector<const Actor*> Actors::actors() const
-{
-    QVector<Actor const*> actors;
-    for (Actor const* a : m_actors) {
-        actors << a;
-    }
-    return actors;
-}
+    auto back() { return m_actors.back(); }
+
+private:
+    QVector<Actor*> m_actors;
+};
+
+
+Q_DECLARE_METATYPE(Actor*)
+Q_DECLARE_METATYPE(QString*)
+Q_DECLARE_METATYPE(QVector<int>)
+
+QDebug operator<<(QDebug dbg, const Actor& actor);
