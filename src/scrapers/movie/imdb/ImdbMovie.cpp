@@ -29,6 +29,7 @@ ImdbMovie::ImdbMovie(ImdbMovieConfiguration& settings, QObject* parent) : MovieS
         MovieScraperInfo::Certification,
         MovieScraperInfo::Runtime,
         MovieScraperInfo::Overview,
+        MovieScraperInfo::Outline,
         MovieScraperInfo::Rating,
         MovieScraperInfo::Tagline,
         MovieScraperInfo::Studios,

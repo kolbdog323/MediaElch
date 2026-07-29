@@ -292,6 +292,10 @@ SOURCES += \
     src/scrapers/movie/imdb/ImdbMovie.cpp \
     src/scrapers/movie/imdb/ImdbMovieScrapeJob.cpp \
     src/scrapers/movie/imdb/ImdbMovieSearchJob.cpp \
+    src/scrapers/movie/omdb/OmdbMovieConfiguration.cpp \
+    src/scrapers/movie/omdb/OmdbMovie.cpp \
+    src/scrapers/movie/omdb/OmdbMovieScrapeJob.cpp \
+    src/scrapers/movie/omdb/OmdbMovieSearchJob.cpp \
     src/scrapers/movie/MovieIdentifier.cpp \
     src/scrapers/movie/MovieMerger.cpp \
     src/scrapers/movie/MovieScrapeJob.cpp \
@@ -340,6 +344,12 @@ SOURCES += \
     src/scrapers/tv_show/imdb/ImdbTvSeasonScrapeJob.cpp \
     src/scrapers/tv_show/imdb/ImdbTvShowScrapeJob.cpp \
     src/scrapers/tv_show/imdb/ImdbTvShowSearchJob.cpp \
+    src/scrapers/tv_show/omdb/OmdbTvConfiguration.cpp \
+    src/scrapers/tv_show/omdb/OmdbTv.cpp \
+    src/scrapers/tv_show/omdb/OmdbTvEpisodeScrapeJob.cpp \
+    src/scrapers/tv_show/omdb/OmdbTvSeasonScrapeJob.cpp \
+    src/scrapers/tv_show/omdb/OmdbTvShowScrapeJob.cpp \
+    src/scrapers/tv_show/omdb/OmdbTvShowSearchJob.cpp \
     src/scrapers/tv_show/SeasonScrapeJob.cpp \
     src/scrapers/tv_show/ShowIdentifier.cpp \
     src/scrapers/tv_show/ShowMerger.cpp \
@@ -442,11 +452,13 @@ SOURCES += \
     src/ui/scrapers/movie/AebnConfigurationView.cpp \
     src/ui/scrapers/movie/AdultDvdEmpireConfigurationView.cpp \
     src/ui/scrapers/movie/ImdbMovieConfigurationView.cpp \
+    src/ui/scrapers/movie/OmdbMovieConfigurationView.cpp \
     src/ui/scrapers/movie/TmdbMovieConfigurationView.cpp \
     src/ui/scrapers/music/UniversalMusicConfigurationView.cpp \
     src/ui/scrapers/ScraperManager.cpp \
     src/ui/scrapers/tv_show/FernsehserienDeConfigurationView.cpp \
     src/ui/scrapers/tv_show/ImdbTvConfigurationView.cpp \
+    src/ui/scrapers/tv_show/OmdbTvConfigurationView.cpp \
     src/ui/scrapers/tv_show/TheTvDbConfigurationView.cpp \
     src/ui/scrapers/tv_show/TmdbTvConfigurationView.cpp \
     src/ui/scrapers/tv_show/TvMazeConfigurationView.cpp \
@@ -675,6 +687,7 @@ HEADERS += Version.h \
     src/scrapers/imdb/ImdbJsonParser.h \
     src/scrapers/imdb/ImdbSearchPage.h \
     src/scrapers/imdb/ImdbReferencePage.h \
+    src/scrapers/omdb/OmdbApi.h \
     src/scrapers/movie/adultdvdempire/AdultDvdEmpireApi.h \
     src/scrapers/movie/adultdvdempire/AdultDvdEmpire.h \
     src/scrapers/movie/adultdvdempire/AdultDvdEmpireScrapeJob.h \
@@ -696,6 +709,10 @@ HEADERS += Version.h \
     src/scrapers/movie/imdb/ImdbMovie.h \
     src/scrapers/movie/imdb/ImdbMovieScrapeJob.h \
     src/scrapers/movie/imdb/ImdbMovieSearchJob.h \
+    src/scrapers/movie/omdb/OmdbMovieConfiguration.h \
+    src/scrapers/movie/omdb/OmdbMovie.h \
+    src/scrapers/movie/omdb/OmdbMovieScrapeJob.h \
+    src/scrapers/movie/omdb/OmdbMovieSearchJob.h \
     src/scrapers/movie/MovieIdentifier.h \
     src/scrapers/movie/MovieMerger.h \
     src/scrapers/movie/MovieScrapeJob.h \
@@ -747,6 +764,12 @@ HEADERS += Version.h \
     src/scrapers/tv_show/imdb/ImdbTvShowParser.h \
     src/scrapers/tv_show/imdb/ImdbTvShowScrapeJob.h \
     src/scrapers/tv_show/imdb/ImdbTvShowSearchJob.h \
+    src/scrapers/tv_show/omdb/OmdbTvConfiguration.h \
+    src/scrapers/tv_show/omdb/OmdbTvEpisodeScrapeJob.h \
+    src/scrapers/tv_show/omdb/OmdbTv.h \
+    src/scrapers/tv_show/omdb/OmdbTvSeasonScrapeJob.h \
+    src/scrapers/tv_show/omdb/OmdbTvShowScrapeJob.h \
+    src/scrapers/tv_show/omdb/OmdbTvShowSearchJob.h \
     src/scrapers/tv_show/SeasonScrapeJob.h \
     src/scrapers/tv_show/ShowIdentifier.h \
     src/scrapers/tv_show/ShowMerger.h \
@@ -851,11 +874,13 @@ HEADERS += Version.h \
     src/ui/scrapers/movie/AebnConfigurationView.h \
     src/ui/scrapers/movie/AdultDvdEmpireConfigurationView.h \
     src/ui/scrapers/movie/ImdbMovieConfigurationView.h \
+    src/ui/scrapers/movie/OmdbMovieConfigurationView.h \
     src/ui/scrapers/movie/TmdbMovieConfigurationView.h \
     src/ui/scrapers/music/UniversalMusicConfigurationView.h \
     src/ui/scrapers/ScraperManager.h \
     src/ui/scrapers/tv_show/FernsehserienDeConfigurationView.h \
     src/ui/scrapers/tv_show/ImdbTvConfigurationView.h \
+    src/ui/scrapers/tv_show/OmdbTvConfigurationView.h \
     src/ui/scrapers/tv_show/TheTvDbConfigurationView.h \
     src/ui/scrapers/tv_show/TmdbTvConfigurationView.h \
     src/ui/scrapers/tv_show/TvMazeConfigurationView.h \

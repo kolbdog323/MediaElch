@@ -6,6 +6,7 @@
 #include "scrapers/movie/MovieScraper.h"
 #include "scrapers/movie/custom/CustomMovieScraper.h"
 #include "scrapers/movie/imdb/ImdbMovie.h"
+#include "scrapers/movie/omdb/OmdbMovie.h"
 #include "scrapers/music/MusicScraper.h"
 #include "scrapers/tv_show/TvScraper.h"
 #include "scrapers/tv_show/thetvdb/TheTvDb.h"
@@ -176,6 +177,16 @@ ScraperSettingsWidget::ScraperSettingsWidget(QWidget* parent) : QWidget(parent),
     ui->customScraperTable->horizontalHeader()->setSectionResizeMode(1, QHeaderView::Stretch);
     ui->customScraperTable->verticalHeader()->setSectionResizeMode(QHeaderView::ResizeToContents);
 
+    m_omdbWarningLabel = new QLabel(this);
+    m_omdbWarningLabel->setStyleSheet("QLabel { color: #e8a631; }");
+    m_omdbWarningLabel->setWordWrap(true);
+    m_omdbWarningLabel->hide();
+    // Insert warning label after the custom scraper table
+    auto* customTab = ui->customScraperTable->parentWidget();
+    if (customTab != nullptr && customTab->layout() != nullptr) {
+        customTab->layout()->addWidget(m_omdbWarningLabel);
+    }
+
     connect(
         this, &ScraperSettingsWidget::saveSettings, this, &ScraperSettingsWidget::onSaveSettings, Qt::DirectConnection);
 
@@ -230,6 +241,7 @@ void ScraperSettingsWidget::loadSettings()
         MovieScraperInfo::Certification,
         MovieScraperInfo::Trailer,
         MovieScraperInfo::Overview,
+        MovieScraperInfo::Outline,
         MovieScraperInfo::Poster,
         MovieScraperInfo::Backdrop,
         MovieScraperInfo::Actors,
@@ -259,6 +271,8 @@ void ScraperSettingsWidget::loadSettings()
         ui->customScraperTable->setItem(row, 0, new QTableWidgetItem(titleForMovieScraperInfo(info)));
         ui->customScraperTable->setCellWidget(row, 1, comboForMovieScraperInfo(info));
     }
+
+    updateOmdbApiKeyWarning();
 
     ui->customTvScraperSettings->loadSettings();
 
@@ -331,6 +345,8 @@ QComboBox* ScraperSettingsWidget::comboForMovieScraperInfo(const MovieScraperInf
         }
     }
 
+    connect(box, elchOverload<int>(&QComboBox::activated), this, [this](int /*idx*/) { updateOmdbApiKeyWarning(); });
+
     return box;
 }
 
@@ -345,6 +361,7 @@ QString ScraperSettingsWidget::titleForMovieScraperInfo(MovieScraperInfo info)
     case MovieScraperInfo::Certification: return tr("Certification");
     case MovieScraperInfo::Trailer: return tr("Trailer");
     case MovieScraperInfo::Overview: return tr("Plot");
+    case MovieScraperInfo::Outline: return tr("Outline");
     case MovieScraperInfo::Poster: return tr("Poster");
     case MovieScraperInfo::Backdrop: return tr("Fanart");
     case MovieScraperInfo::Actors: return tr("Actors");
@@ -362,5 +379,33 @@ QString ScraperSettingsWidget::titleForMovieScraperInfo(MovieScraperInfo info)
     case MovieScraperInfo::Thumb: return tr("Thumb");
     case MovieScraperInfo::TvShowLinks: return tr("TV Show Links");
     default: return tr("Unsupported");
+    }
+}
+
+void ScraperSettingsWidget::updateOmdbApiKeyWarning()
+{
+    using namespace mediaelch::scraper;
+
+    bool omdbUsed = false;
+    for (int row = 0; row < ui->customScraperTable->rowCount(); ++row) {
+        auto* box = dynamic_cast<QComboBox*>(ui->customScraperTable->cellWidget(row, 1));
+        if (box != nullptr && box->currentData().toString() == OmdbMovie::ID) {
+            omdbUsed = true;
+            break;
+        }
+    }
+
+    if (!omdbUsed) {
+        m_omdbWarningLabel->hide();
+        return;
+    }
+
+    const QString apiKey = m_settings->value(Settings::Key("scrapers", "Scrapers/omdb/ApiKey")).toString();
+    if (apiKey.isEmpty()) {
+        m_omdbWarningLabel->setText(
+            tr("OMDb requires a personal API key. Please enter your key under Scraper → OMDb."));
+        m_omdbWarningLabel->show();
+    } else {
+        m_omdbWarningLabel->hide();
     }
 }

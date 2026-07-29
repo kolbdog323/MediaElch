@@ -332,14 +332,14 @@ void MovieSearchWidget::onResultDoubleClicked(QTableWidgetItem* item)
 
     if (m_customScrapersLeft.isEmpty()) {
         m_currentScraper = &custom;
+        emit sigScraperChanged(false);
         emit sigResultClicked();
 
     } else {
         // If the title scraper was TMDb, resolve the IMDB ID so that subsequent
         // scrapers that accept IMDB IDs (e.g. IMDB) can use it directly.
         if (custom.titleScraper() != nullptr
-            && custom.titleScraper()->meta().identifier == mediaelch::scraper::TmdbMovie::ID
-            && !m_imdbId.isValid()) {
+            && custom.titleScraper()->meta().identifier == mediaelch::scraper::TmdbMovie::ID && !m_imdbId.isValid()) {
             resolveImdbIdFromTmdb(currentIdentifier.str(), [this]() {
                 createCustomScraperListLabel();
                 setSearchTextForScraper(m_customScrapersLeft.first());
@@ -369,6 +369,11 @@ void MovieSearchWidget::updateInfoToLoad()
         if (info > 0 && box->isChecked()) {
             m_infosToLoad.insert(MovieScraperInfo(info));
         }
+    }
+
+    // Outline is loaded alongside Overview — no separate checkbox needed.
+    if (m_infosToLoad.contains(MovieScraperInfo::Overview)) {
+        m_infosToLoad.insert(MovieScraperInfo::Outline);
     }
 
     bool allToggled = (m_infosToLoad.size() == enabledBoxCount);
@@ -456,8 +461,10 @@ void MovieSearchWidget::onScraperChanged(int index)
 
     if (m_currentScraper->meta().identifier == mediaelch::scraper::CustomMovieScraper::ID) {
         onCustomMovieScraperSelected();
+        emit sigScraperChanged(true);
     } else if (!isCustomScrapingInProgress()) {
         ui->lblCustomScraperInfo->hide();
+        emit sigScraperChanged(false);
     }
 
     setupLanguageDropdown();
@@ -626,4 +633,48 @@ void MovieSearchWidget::resolveImdbIdFromTmdb(const QString& tmdbId, std::functi
         onResolved();
     });
     scrapeJob->start();
+}
+
+void MovieSearchWidget::onSkipCurrentScraper()
+{
+    using namespace mediaelch::scraper;
+
+    if (isCustomScrapingInProgress()) {
+        // Skip a sub-scraper during multi-step workflow
+        m_customScrapersLeft.removeOne(m_currentScraper->meta().identifier);
+
+        if (m_customScrapersLeft.isEmpty()) {
+            CustomMovieScraper& custom = Manager::instance()->scrapers().customMovieScraper();
+            m_currentScraper = &custom;
+            emit sigScraperChanged(false);
+            emit sigResultClicked();
+        } else {
+            createCustomScraperListLabel();
+            changeScraperTo(m_customScrapersLeft.first());
+        }
+    } else if (m_currentScraper->meta().identifier == CustomMovieScraper::ID) {
+        // Skip the title scraper — start multi-step with remaining scrapers
+        CustomMovieScraper& custom = Manager::instance()->scrapers().customMovieScraper();
+        MovieScraper* titleScraper = custom.titleScraper();
+        const auto scrapers = custom.scrapersNeedSearch(infosToLoad());
+
+        ui->comboScraper->setEnabled(false);
+        ui->comboLanguage->setEnabled(false);
+        ui->detailsGroupBox->setEnabled(false);
+
+        for (const MovieScraper* scraper : scrapers) {
+            if (scraper != titleScraper) {
+                m_customScrapersLeft << scraper->meta().identifier;
+            }
+        }
+
+        if (m_customScrapersLeft.isEmpty()) {
+            m_currentScraper = &custom;
+            emit sigScraperChanged(false);
+            emit sigResultClicked();
+        } else {
+            createCustomScraperListLabel();
+            changeScraperTo(m_customScrapersLeft.first());
+        }
+    }
 }
