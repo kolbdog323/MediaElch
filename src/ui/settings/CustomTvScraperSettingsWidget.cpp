@@ -4,6 +4,7 @@
 #include "globals/Manager.h"
 #include "log/Log.h"
 #include "scrapers/ScraperInfos.h"
+#include "scrapers/image/FanartTv.h"
 #include "scrapers/tv_show/custom/CustomTvScraper.h"
 #include "scrapers/tv_show/omdb/OmdbTv.h"
 #include "settings/Settings.h"
@@ -167,6 +168,30 @@ QComboBox* CustomTvScraperSettingsWidget::comboForTvScraperInfo(ShowScraperInfo 
             box->addItem(scraper->meta().name, scraperId);
             box->setItemData(0, infoInt, Qt::UserRole + 1);
             ++scraperCount;
+        }
+    }
+
+    // For image-related fields, also offer Fanart.tv as an image provider.
+    // Only fields that FanartTv's API actually supports are listed here.
+    static const QSet<ShowScraperInfo> imageInfos{
+        ShowScraperInfo::Banner,       //
+        ShowScraperInfo::Fanart,       //
+        ShowScraperInfo::Poster,       //
+        ShowScraperInfo::Thumb,        //
+        ShowScraperInfo::ExtraArts,    //
+        ShowScraperInfo::SeasonPoster, //
+        ShowScraperInfo::SeasonBanner, //
+        ShowScraperInfo::SeasonThumb,  //
+    };
+
+    if (imageInfos.contains(info)) {
+        for (auto* const img : Manager::instance()->scrapers().imageProviders()) {
+            if (img->meta().identifier == mediaelch::scraper::FanartTv::ID) {
+                box->addItem(img->meta().name, img->meta().identifier);
+                box->setItemData(0, infoInt, Qt::UserRole + 1);
+                ++scraperCount;
+                break;
+            }
         }
     }
 
